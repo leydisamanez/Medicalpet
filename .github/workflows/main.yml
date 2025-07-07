@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - main  # Asegúrate de que esta sea la rama predeterminada
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -37,6 +37,6 @@ jobs:
         run: mvn jacoco:report
 
       - name: Analyze with SonarCloud
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=leydisamanez_Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.branch.name=main -Dsonar.branch.target=main
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=leydisamanez_Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.branch.name=main
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
