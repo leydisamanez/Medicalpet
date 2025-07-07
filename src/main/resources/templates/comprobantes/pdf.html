@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Comprobante PDF - MedicalPet</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0; }
+        .details { margin-bottom: 20px; }
+        .details p { margin: 5px 0; }
+        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .table th { background-color: #f2f2f2; }
+        .footer { text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 th:text="${empresaNombre}"></h1>
+        <p th:text="'RUC: ' + ${empresaRuc}"></p>
+        <p th:text="${empresaDireccion}"></p>
+        <p th:text="'Teléfono: ' + ${empresaTelefono}"></p>
+        <h2 th:text="${comprobante.tipoComprobante} + ' Electrónica'"></h2>
+        <p th:text="'N° ' + ${comprobante.id}"></p>
+    </div>
+    <div class="details">
+        <p><strong>Cliente:</strong> <span th:text="${comprobante.venta.cliente?.nombre ?: 'Sin Cliente'} + ' ' + ${comprobante.venta.cliente?.apellido ?: ''}"></span></p>
+        <p th:if="${comprobante.ruc}"><strong>RUC:</strong> <span th:text="${comprobante.ruc}"></span></p>
+        <p><strong>Fecha:</strong> <span th:text="${comprobante.fecha}"></span></p>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td th:text="${comprobante.venta.producto.nombre}"></td>
+                <td th:text="${comprobante.cantidad}"></td>
+                <td th:text="'S/ ' + ${comprobante.precioUnitario}"></td>
+                <td th:text="'S/ ' + ${comprobante.cantidad * comprobante.precioUnitario}"></td>
+            </tr>
+        </tbody>
+    </table>
+    <div class="details">
+        <p th:if="${comprobante.tipoComprobante == 'FACTURA'}"><strong>Subtotal:</strong> <span th:text="'S/ ' + ${comprobante.subtotal}"></span></p>
+        <p th:if="${comprobante.tipoComprobante == 'FACTURA'}"><strong>IGV (18%):</strong> <span th:text="'S/ ' + ${comprobante.igv}"></span></p>
+        <p th:if="${comprobante.tipoComprobante == 'FACTURA' and comprobante.descuento > 0}"><strong>Descuento:</strong> <span th:text="'S/ ' + ${comprobante.descuento}"></span></p>
+        <p><strong>Total:</strong> <span th:text="'S/ ' + ${comprobante.total}"></span></p>
+    </div>
+    <div class="footer">
+        <p>Gracias por su compra</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registro - Inventario</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="auth-page">
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <i class="fas fa-user-plus"></i>
+                <h2>Crear Cuenta</h2>
+            </div>
+            <form th:action="@{/registro}" method="post">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" placeholder="Usuario" required/>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" placeholder="Contraseña" required/>
+                </div>
+                <div class="input-group">
+                    <i class="fas fa-user-tag"></i>
+                    <select name="rol" required>
+                        <option value="" disabled selected>Selecciona un rol</option>
+                        <option value="ROLE_ADMIN">Administrador</option>
+                        <option value="ROLE_EMPLEADO">Empleado</option>
+                    </select>
+                </div>
+                <button type="submit" class="auth-button">Registrarse</button>
+                <p class="auth-link">¿Ya tienes cuenta? <a th:href="@{/login}">Inicia Sesión</a></p>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

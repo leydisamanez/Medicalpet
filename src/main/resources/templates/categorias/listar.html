@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Categorías - Inventario</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1>Lista de Categorías</h1>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="categoria : ${categorias}">
+                    <td th:text="${categoria.id}"></td>
+                    <td th:text="${categoria.nombre}"></td>
+                    <td th:text="${categoria.descripcion}"></td>
+                    <td>
+                        <a th:href="@{/categorias/editar/{id}(id=${categoria.id})}" class="action-button">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a th:href="@{/categorias/eliminar/{id}(id=${categoria.id})}" class="action-button delete">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <a th:href="@{/categorias/nueva}" class="add-button"><i class="fas fa-plus"></i> Nueva Categoría</a>
+    </div>
+</body>
+</html>

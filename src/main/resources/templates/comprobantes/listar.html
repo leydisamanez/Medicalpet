@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Comprobantes - MedicalPet</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        .navbar { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.5em; font-weight: bold; }
+        .navbar-menu a { color: #fff; margin-left: 15px; text-decoration: none; transition: color 0.3s; }
+        .navbar-menu a:hover { color: #3498db; }
+        .content-container { max-width: 1200px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .page-title { color: #2c3e50; margin-bottom: 20px; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background: #3498db; color: #fff; }
+        .action-button { padding: 8px 12px; margin-right: 5px; background: #2ecc71; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+        .action-button.delete { background: #e74c3c; }
+        .action-button:hover { background: #27ae60; }
+        .action-button.delete:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario MedicalPet</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1 class="page-title">Lista de Comprobantes</h1>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Cliente</th>
+                    <th>RUC</th>
+                    <th>Producto</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="comprobante : ${comprobantes}">
+                    <td th:text="${comprobante.id}"></td>
+                    <td th:text="${comprobante.tipoComprobante}"></td>
+                    <td th:text="${comprobante.venta.cliente?.nombre ?: 'Sin Cliente'} + ' ' + ${comprobante.venta.cliente?.apellido ?: ''}"></td>
+                    <td th:text="${comprobante.ruc ?: 'N/A'}"></td>
+                    <td th:text="${comprobante.venta.producto.nombre}"></td>
+                    <td th:text="${comprobante.fecha}"></td>
+                    <td th:text="'S/ ' + ${comprobante.total}"></td>
+                    <td>
+                        <a th:href="@{/comprobantes/detalle/{id}(id=${comprobante.id})}" class="action-button"><i class="fas fa-eye"></i> Detalle</a>
+                        <a th:href="@{/comprobantes/exportar-pdf/{id}(id=${comprobante.id})}" class="action-button"><i class="fas fa-file-pdf"></i> Exportar PDF</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

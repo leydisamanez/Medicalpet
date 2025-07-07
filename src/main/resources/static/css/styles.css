@@ -1,0 +1,562 @@
+/* Estilos Generales */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+/* Barra de Navegación */
+.navbar {
+    background-color: #1a252f;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.navbar-brand i {
+    margin-right: 10px;
+    color: #4e73df;
+}
+
+.navbar-menu a {
+    color: white;
+    text-decoration: none;
+    margin-left: 20px;
+    font-size: 1em;
+    transition: color 0.3s ease;
+}
+
+.navbar-menu a i {
+    margin-right: 5px;
+}
+
+.navbar-menu a:hover {
+    color: #4e73df;
+}
+
+/* Estilos para Autenticación (login.html, registro.html) */
+.auth-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
+
+.auth-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 20px;
+}
+
+.auth-card {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.auth-header i {
+    font-size: 1.5em;
+    color: #4e73df;
+    margin-right: 10px;
+}
+
+.auth-header h2 {
+    color: #1a252f;
+    font-size: 1.5em;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #4e73df;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+    width: 100%;
+    padding: 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.input-group textarea {
+    padding: 12px 15px;
+    resize: vertical;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    outline: none;
+    border-color: #4e73df;
+}
+
+.auth-button {
+    background-color: #4e73df;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.auth-button:hover {
+    background-color: #2e59d9;
+    transform: scale(1.02);
+}
+
+.auth-button i {
+    margin-right: 5px;
+}
+
+.auth-link {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.auth-link a {
+    color: #4e73df;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+/* Estilos para Dashboard (dashboard.html) */
+.dashboard-container {
+    padding: 30px;
+    text-align: center;
+}
+
+.dashboard-container h1 {
+    margin-bottom: 30px;
+    color: #1a252f;
+    font-size: 2em;
+}
+
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card i {
+    font-size: 2.5em;
+    color: #4e73df;
+    margin-bottom: 15px;
+}
+
+.card h3 {
+    margin-bottom: 10px;
+    color: #1a252f;
+}
+
+.card p {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.card-button {
+    display: inline-block;
+    background-color: #4e73df;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.card-button:hover {
+    background-color: #2e59d9;
+    transform: scale(1.02);
+}
+
+/* Estilos para Contenido (categorias/listar.html, empleados.html, productos/listar.html, ventas/listar.html, facturas/listar.html, reportes/listar.html) */
+.content-container {
+    padding: 30px;
+}
+
+.content-container h1 {
+    margin-bottom: 30px;
+    color: #1a252f;
+    text-align: center;
+    font-size: 2em;
+}
+
+.filter-section {
+    margin-bottom: 20px;
+    text-align: right;
+}
+
+.filter-select {
+    padding: 8px 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #4e73df;
+}
+
+.product-grid,
+.report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.product-card,
+.report-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover,
+.report-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-card h3,
+.report-card h3 {
+    color: #1a252f;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.product-card p,
+.report-card p {
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+.product-card p strong,
+.report-card p strong {
+    color: #1a252f;
+}
+
+.status-disponible {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+.status-vendido {
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.card-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+    padding: 15px;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #1a252f;
+    color: white;
+}
+
+.data-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.data-table tbody tr:hover {
+    background-color: #e0eafc;
+}
+
+.action-button {
+    display: inline-block;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.action-button i {
+    margin-right: 5px;
+}
+
+.action-button {
+    background-color: #4e73df;
+    color: white;
+}
+
+.action-button:hover {
+    background-color: #2e59d9;
+}
+
+.action-button.delete {
+    background-color: #e74c3c;
+}
+
+.action-button.delete:hover {
+    background-color: #c0392b;
+}
+
+.add-button {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: #2ecc71;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.add-button i {
+    margin-right: 5px;
+}
+
+.add-button:hover {
+    background-color: #27ae60;
+    transform: scale(1.02);
+}
+
+/* Estilos para Formularios (categorias/form.html, productos/form.html, ventas/form.html, facturas/form.html) */
+.form-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.cancel-button {
+    display: inline-block;
+    padding: 12px;
+    border-radius: 5px;
+    background-color: #e74c3c;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.cancel-button i {
+    margin-right: 5px;
+}
+
+.cancel-button:hover {
+    background-color: #c0392b;
+    transform: scale(1.02);
+}
+.success-message {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+    .auth-card {
+        width: 90%;
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .navbar {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .navbar-menu a {
+        margin-left: 0;
+        margin-right: 15px;
+    }
+
+    .product-grid,
+    .report-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-table {
+        overflow-x: auto;
+    }
+
+    .form-card {
+        width: 90%;
+    }
+}
+/* Estilos para el formulario */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #2d3436;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #dfe6e9;
+    border-radius: 5px;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.2);
+}
+
+.submit-button, .cancel-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    margin-right: 1rem;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 25px;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+}
+
+.submit-button {
+    background-color: #3498db;
+}
+
+.submit-button:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+}
+
+.cancel-button {
+    background-color: #7f8c8d;
+}
+
+.cancel-button:hover {
+    background-color: #636e72;
+    transform: translateY(-2px);
+}
+
+.error-message {
+    color: #e74c3c;
+    background-color: #fceae9;
+    padding: 0.75rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.warning-message {
+    color: #d4a017;
+    background-color: #fef8e6;
+    padding: 0.75rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+/* Estilos sugeridos para styles.css */
+.hover-effect {
+    transform: scale(1.05);
+    transition: transform 0.3s;
+}
+.table-row:hover {
+    background: #f5f6fa;
+}
+.no-data-row {
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+}

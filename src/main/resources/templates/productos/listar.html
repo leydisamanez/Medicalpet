@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Productos - MedicalPet</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        body { font-family: 'Arial', sans-serif; background: #f4f7fa; margin: 0; }
+        .navbar { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.5em; font-weight: bold; }
+        .navbar-menu a { color: #fff; margin-left: 15px; text-decoration: none; transition: color 0.3s; }
+        .navbar-menu a:hover { color: #3498db; }
+        .content-container { max-width: 1200px; margin: 30px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
+        .page-title { color: #2c3e50; margin-bottom: 20px; text-align: center; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background: #3498db; color: #fff; font-weight: bold; }
+        .data-table tr:hover { background: #f9f9f9; }
+        .action-button { padding: 8px 12px; margin-right: 5px; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+        .action-button.edit { background: #2ecc71; }
+        .action-button.delete { background: #e74c3c; }
+        .action-button.deactivate { background: #f39c12; }
+        .action-button.edit:hover { background: #27ae60; }
+        .action-button.delete:hover:not(:disabled) { background: #c0392b; }
+        .action-button.deactivate:hover { background: #e67e22; }
+        .action-button:disabled { background: #cccccc; cursor: not-allowed; }
+        .add-button { display: inline-block; padding: 10px 20px; background: #3498db; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+        .add-button:hover { background: #2980b9; }
+        .error-message { color: #e74c3c; font-size: 0.9em; margin-bottom: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> MedicalPet</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1 class="page-title">Inventario de Productos</h1>
+        <div th:if="${param.error}" class="error-message" th:text="${param.error[0]}"></div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Ubicación</th>
+                    <th>Vencimiento</th>
+                    <th>Categoría</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="producto : ${productos}">
+                    <td th:text="${producto.id}"></td>
+                    <td th:text="${producto.nombre}"></td>
+                    <td th:text="'S/ ' + ${producto.precio}"></td>
+                    <td th:text="${producto.stock}"></td>
+                    <td th:text="${producto.estado ?: 'N/A'}"></td>
+                    <td th:text="${producto.ubicacion ?: 'N/A'}"></td>
+                    <td th:text="${#temporals.format(producto.vencimiento, 'dd/MM/yyyy') ?: 'N/A'}"></td>
+                    <td th:text="${producto.categoria?.nombre ?: 'Sin Categoría'}"></td>
+                    <td>
+                        <a th:href="@{/productos/editar/{id}(id=${producto.id})}" class="action-button edit"><i class="fas fa-edit"></i> Editar</a>
+                        <a th:href="@{/productos/desactivar/{id}(id=${producto.id})}" class="action-button deactivate"><i class="fas fa-ban"></i> Desactivar</a>
+                        <a th:href="@{/productos/eliminar/{id}(id=${producto.id})}" 
+                           th:classappend="${ventaService.findByProductoId(producto.id).isEmpty()} ? 'action-button delete' : 'action-button delete disabled'" 
+                           th:attr="disabled=${ventaService.findByProductoId(producto.id).isEmpty()} ? null : 'disabled'"><i class="fas fa-trash-alt"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <a th:href="@{/productos/nuevo}" class="add-button"><i class="fas fa-plus"></i> Nuevo Producto</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalles del Reporte - Inventario</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1>Detalles del Reporte</h1>
+        <div class="report-card">
+            <h3 th:text="${reporte.tipo} + ' - ' + ${#dates.format(reporte.fecha, 'yyyy-MM-dd')}"></h3>
+            <p><strong>Descripción:</strong> <span th:text="${reporte.descripcion}"></span></p>
+            <p><strong>Total:</strong> <span th:text="${reporte.total}"></span></p>
+            <div class="card-actions">
+                <a th:href="@{/reportes/editar/{id}(id=${reporte.id})}" class="action-button">
+                    <i class="fas fa-edit"></i> Editar
+                </a>
+                <a th:href="@{/reportes/listar}" class="cancel-button"><i class="fas fa-arrow-left"></i> Volver</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

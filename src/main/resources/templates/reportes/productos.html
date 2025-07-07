@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Productos Más Vendidos - MedicalPet</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>MedicalPet - Sistema de Veterinaria</h1>
+        <nav>
+            <a href="/dashboard">Inicio</a>
+            <a href="/categorias/listar">Categorías</a>
+            <a href="/productos/listar">Inventario</a>
+            <a href="/ventas/listar">Ventas</a>
+            <a href="/facturas/listar">Facturas</a>
+         <!--   <a href="/reportes/ventas">Reportes</a>-->
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" href="/admin/empleados">Empleados</a>
+            <a href="/logout">Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="container">
+        <h2>Productos Más Vendidos</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad Vendida</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="entry : ${productosMasVendidos}">
+                    <td th:text="${productoService.getProductoById(entry.key)?.nombre}"></td>
+                    <td th:text="${entry.value}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <a href="/reportes/ventas">Volver a Reportes</a>
+    </div>
+</body>
+</html>

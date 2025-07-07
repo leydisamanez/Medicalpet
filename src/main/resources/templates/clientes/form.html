@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Formulario de Cliente - Sistema de Inventario MedicalPet</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .content-container { max-width: 600px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .navbar { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.5em; font-weight: bold; }
+        .navbar-menu a { color: #fff; margin-left: 15px; text-decoration: none; transition: color 0.3s; }
+        .navbar-menu a:hover { color: #3498db; }
+        .page-title { color: #2c3e50; margin-bottom: 20px; }
+        form div { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #2c3e50; }
+        input, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .add-button { padding: 10px 20px; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: background 0.3s; }
+        .add-button:hover { background: #2980b9; }
+        .error-message { color: #e74c3c; font-size: 0.9em; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario MedicalPet</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+           <!---- <a th:href="@{/categorias/listar}"><i class="fas fa-tags"></i> Categorías</a>
+            <a th:href="@{/productos/listar}"><i class="fas fa-box"></i> Productos</a>
+            <a th:href="@{/clientes/listar}"><i class="fas fa-user"></i> Clientes</a>
+            <a th:href="@{/ventas/listar}"><i class="fas fa-shopping-cart"></i> Ventas</a>
+            <a th:href="@{/facturas/listar}"><i class="fas fa-file-invoice"></i> Facturas</a>
+           <a th:href="@{/reportes/listar}"><i class="fas fa-chart-bar"></i> Reportes</a> 
+            <a th:href="@{/admin/empleados}"><i class="fas fa-users"></i> Empleados</a>-->
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1 class="page-title" th:text="${cliente.id} ? 'Editar Cliente' : 'Nuevo Cliente'"></h1>
+        <form th:action="@{/clientes/guardar}" th:object="${cliente}" method="post">
+            <input type="hidden" th:field="*{id}" />
+            <div>
+                <label for="nombre">Nombre:</label>
+                <input type="text" th:field="*{nombre}" id="nombre" required />
+                <div class="error-message" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+            </div>
+            <div>
+                <label for="apellido">Apellido:</label>
+                <input type="text" th:field="*{apellido}" id="apellido" required />
+                <div class="error-message" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></div>
+            </div>
+            <div>
+                <label for="dni">DNI:</label>
+                <input type="text" th:field="*{dni}" id="dni" maxlength="8" placeholder="DNI (8 dígitos)" />
+                <div class="error-message" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></div>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" th:field="*{email}" id="email" required />
+                <div class="error-message" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+            <div>
+                <label for="telefono">Teléfono:</label>
+                <input type="text" th:field="*{telefono}" id="telefono" />
+            </div>
+            <div>
+                <label for="direccion">Dirección:</label>
+                <textarea th:field="*{direccion}" id="direccion"></textarea>
+            </div>
+            <button type="submit" class="add-button">Guardar</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - Inventario</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario</div>
+        <nav class="navbar-menu">
+             <!--<a th:href="@{/categorias/listar}"><i class="fas fa-tags"></i> Categorías</a>
+            <a th:href="@{/productos/listar}"><i class="fas fa-box"></i> Productos</a>
+            <a th:href="@{/clientes/listar}"><i class="fas fa-user"></i> Clientes</a>
+            <a th:href="@{/ventas/listar}"><i class="fas fa-shopping-cart"></i> Ventas</a>
+           <a th:href="@{/reportes/listar}"><i class="fas fa-chart-bar"></i> Reportes</a> 
+            <a th:href="@{/admin/empleados}"><i class="fas fa-users"></i> Empleados</a>-->
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="dashboard-container">
+        <h1>Bienvenido al Sistema de Inventario</h1>
+        <div class="dashboard-cards">
+            <div class="card">
+                <i class="fas fa-tags"></i>
+                <h3>Categorías</h3>
+                <p>Administra las categorías de productos.</p>
+                <a th:href="@{/categorias/listar}" class="card-button">Ver Categorías</a>
+            </div>
+            <div class="card">
+                <i class="fas fa-box-open"></i>
+                <h3>Productos</h3>
+                <p>Administra los productos en inventario.</p>
+                <a th:href="@{/productos/listar}" class="card-button">Ver Productos</a>
+            </div>
+            <div class="card">
+                <i class="fas fa-user"></i>
+                <h3>Clientes</h3>
+                <p>Gestiona los clientes del sistema.</p>
+                <a th:href="@{/clientes/listar}" class="card-button">Ver Clientes</a>
+            </div>
+            <div class="card">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Ventas</h3>
+                <p>Registra y consulta las ventas.</p>
+                <a th:href="@{/ventas/listar}" class="card-button">Ver Ventas</a>
+            </div>
+          
+             <!--<div class="card">
+                <i class="fas fa-chart-bar"></i>
+                <h3>Reportes</h3>
+                <p>Consulta reportes de ventas e inventario.</p>
+                <a th:href="@{/reportes/listar}" class="card-button">Ver Reportes</a>
+            </div> -->
+            <div class="card">
+                <i class="fas fa-users"></i>
+                <h3>Empleados</h3>
+                <p>Gestiona los empleados del sistema.</p>
+                <a th:href="@{/admin/empleados}" class="card-button">Ver Empleados</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

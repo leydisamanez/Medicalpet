@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detalle de Factura - MedicalPet</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <style>
+        .container { max-width: 800px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .navbar { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.5em; font-weight: bold; }
+        .navbar-menu a { color: #fff; margin-left: 15px; text-decoration: none; transition: color 0.3s; }
+        .navbar-menu a:hover { color: #3498db; }
+        .invoice-header { text-align: center; margin-bottom: 20px; }
+        .invoice-details { margin-bottom: 20px; }
+        .invoice-details p { margin: 5px 0; }
+        .invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .invoice-table th, .invoice-table td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        .invoice-table th { background: #3498db; color: #fff; }
+        .action-buttons { display: flex; gap: 10px; }
+        .action-button { padding: 10px 20px; background: #3498db; color: #fff; border-radius: 4px; text-decoration: none; }
+        .action-button:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> MedicalPet</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Inicio</a>
+            <a th:href="@{/categorias/listar}"><i class="fas fa-tags"></i> Categorías</a>
+            <a th:href="@{/productos/listar}"><i class="fas fa-box"></i> Inventario</a>
+            <a th:href="@{/ventas/listar}"><i class="fas fa-shopping-cart"></i> Ventas</a>
+            <a th:href="@{/facturas/listar}"><i class="fas fa-file-invoice"></i> Facturas</a>
+          <!--  <a th:href="@{/reportes/ventas}"><i class="fas fa-chart-bar"></i> Reportes</a>-->
+            <a th:if="${#authorization.expression('hasRole(''ADMIN'')')}" th:href="@{/admin/empleados}"><i class="fas fa-users"></i> Empleados</a>
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="invoice-header">
+            <h2>Factura N° <span th:text="${factura.id}"></span></h2>
+            <p><strong th:text="${empresaNombre}"></strong></p>
+            <p>RUC: <span th:text="${empresaRuc}"></span></p>
+            <p>Dirección: <span th:text="${empresaDireccion}"></span></p>
+            <p>Teléfono: <span th:text="${empresaTelefono}"></span></p>
+        </div>
+        <div class="invoice-details">
+            <p><strong>Fecha de Emisión:</strong> <span th:text="${factura.fecha}"></span></p>
+            <p><strong>Cliente:</strong> <span th:text="${factura.venta.cliente?.nombre ?: 'Sin Cliente'} + ' ' + ${factura.venta.cliente?.apellido ?: ''}"></span></p>
+            <p><strong>DNI/RUC Cliente:</strong> <span th:text="${factura.venta.cliente?.dni != null} ? ${factura.venta.cliente?.dni} : 'N/A'"></span></p>
+        </div>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td th:text="${factura.venta.producto.nombre}"></td>
+                    <td th:text="${factura.cantidad}"></td>
+                    <td th:text="'S/ ' + ${factura.precioUnitario}"></td>
+                    <td th:text="'S/ ' + ${factura.subtotal}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="invoice-details">
+            <p><strong>Subtotal:</strong> <span th:text="'S/ ' + ${factura.subtotal}"></span></p>
+            <p><strong>IGV (18%):</strong> <span th:text="'S/ ' + ${factura.igv}"></span></p>
+            <p><strong>Descuento:</strong> <span th:text="'S/ ' + ${factura.descuento}"></span></p>
+            <p><strong>Total:</strong> <span th:text="'S/ ' + ${factura.total}"></span></p>
+        </div>
+        <div class="action-buttons">
+            <a th:href="@{/facturas/exportar-pdf/{id}(id=${factura.id})}" class="action-button"><i class="fas fa-file-pdf"></i> Descargar PDF</a>
+            <a th:href="@{/facturas/listar}" class="action-button"><i class="fas fa-arrow-left"></i> Volver</a>
+        </div>
+    </div>
+</body>
+</html>

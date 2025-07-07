@@ -1,0 +1,6 @@
+projectKey=medicalpet
+serverUrl=http://localhost:9000
+serverVersion=25.6.0.109173
+dashboardUrl=http://localhost:9000/dashboard?id=medicalpet
+ceTaskId=bafa2b69-ba2e-4fdd-bedf-03288c041a3d
+ceTaskUrl=http://localhost:9000/api/ce/task?id=bafa2b69-ba2e-4fdd-bedf-03288c041a3d

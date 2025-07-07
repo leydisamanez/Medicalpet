@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lista de Clientes - Sistema de Inventario MedicalPet</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .content-container { max-width: 1400px; margin: 20px auto; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); }
+        .navbar { background: #2c3e50; color: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar-brand { font-size: 1.5em; font-weight: bold; }
+        .navbar-menu a { color: #fff; margin-left: 15px; text-decoration: none; transition: color 0.3s; }
+        .navbar-menu a:hover { color: #3498db; }
+        .page-title { color: #2c3e50; margin-bottom: 20px; }
+        .controls { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+        .search-bar { flex: 2; }
+        .search-wrapper { display: flex; align-items: center; }
+        #searchInput { padding: 10px; width: 100%; border: 1px solid #ddd; border-radius: 4px 0 0 4px; }
+        .search-button { padding: 10px 15px; background: #3498db; color: #fff; border: none; border-radius: 0 4px 4px 0; cursor: pointer; transition: background 0.3s; }
+        .search-button:hover { background: #2980b9; }
+        .filter-options { flex: 1; display: flex; gap: 10px; }
+        .filter-options select { padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .data-table th, .data-table td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        .data-table th { background: #3498db; color: #fff; }
+        .data-table th a { color: #fff; text-decoration: none; }
+        .data-table th a:hover { text-decoration: underline; }
+        .action-button { padding: 8px 12px; margin-right: 5px; background: #2ecc71; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+        .action-button.delete { background: #e74c3c; }
+        .action-button:hover { background: #27ae60; }
+        .action-button.delete:hover { background: #c0392b; }
+        .pagination { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .pagination-link { padding: 8px 12px; background: #ecf0f1; color: #2c3e50; text-decoration: none; border-radius: 4px; }
+        .pagination-link:hover { background: #bdc3c7; }
+        .pagination-info { padding: 8px; }
+        .action-buttons { display: flex; gap: 10px; }
+        .add-button { padding: 10px 20px; background: #3498db; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+        .add-button:hover { background: #2980b9; }
+        .export-button { padding: 10px 20px; background: #2ecc71; color: #fff; border-radius: 4px; text-decoration: none; transition: background 0.3s; }
+        .export-button:hover { background: #27ae60; }
+        @media (max-width: 768px) {
+            .controls { flex-direction: column; }
+            .filter-options { flex-direction: column; }
+            .data-table { display: block; overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario MedicalPet</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+           <!-- <a th:href="@{/categorias/listar}"><i class="fas fa-tags"></i> Categorías</a>
+            <a th:href="@{/productos/listar}"><i class="fas fa-box"></i> Productos</a>
+            <a th:href="@{/clientes/listar}"><i class="fas fa-user"></i> Clientes</a>
+            <a th:href="@{/ventas/listar}"><i class="fas fa-shopping-cart"></i> Ventas</a>
+            <a th:href="@{/facturas/listar}"><i class="fas fa-file-invoice"></i> Facturas</a>
+            <a th:href="@{/reportes/listar}"><i class="fas fa-chart-bar"></i> Reportes</a>
+            <a th:href="@{/admin/empleados}"><i class="fas fa-users"></i> Empleados</a>-->
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1 class="page-title">Lista de Clientes</h1>
+        <div class="controls">
+            <div class="search-bar">
+                <div class="search-wrapper">
+                    <input type="text" id="searchInput" placeholder="Buscar por nombre, apellido, email o DNI..." th:value="${keyword}" />
+                    <button class="search-button"><i class="fas fa-search"></i></button>
+                </div>
+            </div>
+            <div class="filter-options">
+                <select id="pageSize" th:value="${pageSize}" onchange="window.location.href='/clientes/listar?page=0&size='+this.value+'&sort='+($('#sort').val()||'nombre,asc')+'&keyword='+$('#searchInput').val()">
+                    <option value="5">5 por página</option>
+                    <option value="10">10 por página</option>
+                    <option value="20">20 por página</option>
+                </select>
+                <select id="sort" th:value="${sort}" onchange="window.location.href='/clientes/listar?page=0&size='+$('#pageSize').val()+'&sort='+this.value+'&keyword='+$('#searchInput').val()">
+                    <option value="nombre,asc">Nombre (asc)</option>
+                    <option value="nombre,desc">Nombre (desc)</option>
+                    <option value="apellido,asc">Apellido (asc)</option>
+                    <option value="apellido,desc">Apellido (desc)</option>
+                    <option value="email,asc">Email (asc)</option>
+                    <option value="email,desc">Email (desc)</option>
+                    <option value="dni,asc">DNI (asc)</option>
+                    <option value="dni,desc">DNI (desc)</option>
+                </select>
+            </div>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th><a th:href="@{/clientes/listar(page=0, size=${pageSize}, sort=${sortId}, keyword=${keyword})}">ID</a></th>
+                    <th><a th:href="@{/clientes/listar(page=0, size=${pageSize}, sort=${sortNombre}, keyword=${keyword})}">Nombre</a></th>
+                    <th><a th:href="@{/clientes/listar(page=0, size=${pageSize}, sort=${sortApellido}, keyword=${keyword})}">Apellido</a></th>
+                    <th><a th:href="@{/clientes/listar(page=0, size=${pageSize}, sort=${sortEmail}, keyword=${keyword})}">Email</a></th>
+                    <th><a th:href="@{/clientes/listar(page=0, size=${pageSize}, sort=${sortDni}, keyword=${keyword})}">DNI</a></th>
+                    <th>Teléfono</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="cliente : ${clientes}" class="table-row">
+                    <td th:text="${cliente.id}"></td>
+                    <td th:text="${cliente.nombre}"></td>
+                    <td th:text="${cliente.apellido}"></td>
+                    <td th:text="${cliente.email}"></td>
+                    <td th:text="${cliente.dni} ?: 'N/A'"></td>
+                    <td th:text="${cliente.telefono} ?: 'N/A'"></td>
+                    <td th:text="${cliente.direccion} ?: 'N/A'"></td>
+                    <td>
+                        <a th:href="@{/clientes/editar/{id}(id=${cliente.id})}" class="action-button edit"><i class="fas fa-edit"></i> Editar</a>
+                        <a th:href="@{/clientes/eliminar/{id}(id=${cliente.id})}" class="action-button delete"><i class="fas fa-trash"></i> Eliminar</a>
+                    </td>
+                </tr>
+                <tr th:if="${clientes.isEmpty()}" class="no-data-row">
+                    <td colspan="8">No se encontraron clientes.</td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="pagination">
+            <a th:unless="${currentPage == 0}" th:href="@{/clientes/listar(page=${currentPage - 1}, size=${pageSize}, sort=${sort}, keyword=${keyword})}" class="pagination-link">« Anterior</a>
+            <span class="pagination-info">Página [[${currentPage + 1}]] de [[${totalPages}]]</span>
+            <a th:unless="${currentPage + 1 == totalPages}" th:href="@{/clientes/listar(page=${currentPage + 1}, size=${pageSize}, sort=${sort}, keyword=${keyword})}" class="pagination-link">Siguiente »</a>
+        </div>
+        <div class="action-buttons">
+            <a th:href="@{/clientes/nuevo}" class="add-button"><i class="fas fa-plus"></i> Nuevo Cliente</a>
+            <a th:href="@{/clientes/exportar(keyword=${keyword})}" class="export-button"><i class="fas fa-file-csv"></i> Exportar CSV</a>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#searchInput').on('input', function() {
+                let keyword = $(this).val();
+                window.location.href = "/clientes/listar?page=0&size=" + $('#pageSize').val() + "&sort=" + $('#sort').val() + "&keyword=" + keyword;
+            });
+
+            $('.action-button').hover(
+                function() { $(this).addClass('hover-effect'); },
+                function() { $(this).removeClass('hover-effect'); }
+            );
+
+            $('.delete').click(function(e) {
+                if (!confirm('¿Estás seguro de eliminar este cliente?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

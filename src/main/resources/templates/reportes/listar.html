@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Reportes - Inventario</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand"><i class="fas fa-warehouse"></i> Sistema de Inventario</div>
+        <nav class="navbar-menu">
+            <a th:href="@{/dashboard}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+            <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</a>
+        </nav>
+    </header>
+    <div class="content-container">
+        <h1>Lista de Reportes</h1>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="reporte : ${reportes}">
+                    <td th:text="${reporte.id}"></td>
+                    <td th:text="${reporte.tipo}"></td>
+                    <td th:text="${#dates.format(reporte.fecha, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${reporte.total}"></td>
+                    <td>
+                        <a th:href="@{/reportes/detalle/{id}(id=${reporte.id})}" class="action-button">
+                            <i class="fas fa-eye"></i> Detalle
+                        </a>
+                        <a th:href="@{/reportes/editar/{id}(id=${reporte.id})}" class="action-button">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                        <a th:href="@{/reportes/eliminar/{id}(id=${reporte.id})}" class="action-button delete">
+                            <i class="fas fa-trash-alt"></i> Eliminar
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <a th:href="@{/reportes/nuevo}" class="add-button"><i class="fas fa-plus"></i> Nuevo Reporte</a>
+    </div>
+</body>
+</html>
