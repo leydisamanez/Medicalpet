@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 
 @RequestMapping("/admin")
-public class AdminController 
-{
+public class AdminController {
+
   @Autowired
     private UsuarioRepository usuarioRepository;
   @Autowired

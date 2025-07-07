@@ -1,13 +1,25 @@
 package com.medicalpet.medicalpet.controller;
 
+import com.medicalpet.medicalpet.model.Cliente;
 import com.medicalpet.medicalpet.model.Comprobante;
 import com.medicalpet.medicalpet.model.DetalleVenta;
-import com.medicalpet.medicalpet.model.Venta;
 import com.medicalpet.medicalpet.model.Producto;
-import com.medicalpet.medicalpet.model.Cliente;
+import com.medicalpet.medicalpet.model.Venta;
 import com.medicalpet.medicalpet.service.ClienteService;
 import com.medicalpet.medicalpet.service.ProductoService;
 import com.medicalpet.medicalpet.service.VentaService;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.persistence.NonUniqueResultException;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -15,10 +27,13 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -31,47 +46,31 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import jakarta.persistence.NonUniqueResultException;
-
-@Controller
+  @Controller
 @RequestMapping("/ventas")
 public class VentaController {
     private static final Logger logger = LoggerFactory.getLogger(VentaController.class);
 
-    @Autowired
+  @Autowired
     private VentaService ventaService;
 
-    @Autowired
+  @Autowired
     private ProductoService productoService;
 
-    @Autowired
+  @Autowired
     private ClienteService clienteService;
 
-    @Autowired
+  @Autowired
     private JavaMailSender mailSender;
 
-    public static class VentaDTO {
+  public static class VentaDTO {
         private Long id;
         private String clienteNombre;
         private String fechaFormateada;
         private double total;
         private List<String> productoNombres;
 
-        public VentaDTO(Venta venta) {
+    public VentaDTO(Venta venta) {
             this.id = venta.getId();
             this.clienteNombre = venta.getCliente() != null ? venta.getCliente().getNombre() + " " + venta.getCliente().getApellido() : "N/A";
             this.fechaFormateada = venta.getFecha() != null ? venta.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A";
@@ -89,47 +88,47 @@ public class VentaController {
         public List<String> getProductoNombres() { return productoNombres; }
     }
 
-    @GetMapping("/listar")
+  @GetMapping("/listar")
     public String listar(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "fecha,desc") String sort,
             @RequestParam(defaultValue = "") String keyword,
             Model model) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == "anonymousUser") {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    if (auth == null || !auth.isAuthenticated() || auth.getPrincipal() == "anonymousUser") {
             logger.warn("⚠️ Usuario no autenticado o anónimo al acceder a /ventas/listar");
             return "redirect:/login";
         }
-        logger.info("ℹ️ Usuario autenticado: {}", auth.getName());
-        try {
-            String[] sortParams = sort.split(",");
-            Sort sortOrder = Sort.by(sortParams[0]);
-            if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
-                sortOrder = sortOrder.descending();
-            } else {
-                sortOrder = sortOrder.ascending();
-            }
-            Pageable pageable = PageRequest.of(page, size, sortOrder);
-            Page<Venta> ventasPage = ventaService.searchVentas(keyword, pageable);
-            List<VentaDTO> ventasDTO = new ArrayList<>();
-            if (ventasPage == null || ventasPage.getContent().isEmpty()) {
-                logger.info("ℹ️ No se encontraron ventas para la página {} con keyword '{}'", page, keyword);
-                model.addAttribute("ventas", ventasDTO);
-                model.addAttribute("message", "No se encontraron ventas.");
-            } else {
-                ventasDTO = ventasPage.getContent().stream()
+    logger.info("ℹ️ Usuario autenticado: {}", auth.getName());
+    try {
+      String[] sortParams = sort.split(",");
+      Sort sortOrder = Sort.by(sortParams[0]);
+      if (sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")) {
+        sortOrder = sortOrder.descending();
+      } else {
+        sortOrder = sortOrder.ascending();
+      }
+      Pageable pageable = PageRequest.of(page, size, sortOrder);
+      Page<Venta> ventasPage = ventaService.searchVentas(keyword, pageable);
+      List<VentaDTO> ventasDTO = new ArrayList<>();
+      if (ventasPage == null || ventasPage.getContent().isEmpty()) {
+        logger.info("ℹ️ No se encontraron ventas'", page, keyword);
+        model.addAttribute("ventas", ventasDTO);
+        model.addAttribute("message", "No se encontraron ventas.");
+      } else {
+        ventasDTO = ventasPage.getContent().stream()
                         .map(VentaDTO::new)
                         .collect(Collectors.toList());
-                logger.info("✅ Se cargaron {} ventas para la página {}", ventasDTO.size(), page);
-                model.addAttribute("ventas", ventasDTO);
-            }
-            model.addAttribute("currentPage", page);
-            model.addAttribute("totalPages", ventasPage != null ? ventasPage.getTotalPages() : 0);
-            model.addAttribute("pageSize", size);
-            model.addAttribute("sort", sort);
-            model.addAttribute("keyword", keyword);
-            model.addAttribute("sortId", "id," + (sort.startsWith("id") ? (sort.endsWith("asc") ? "desc" : "asc") : "desc"));
+        logger.info("✅ Se cargaron {} ventas para la página {}", ventasDTO.size(), page);
+        model.addAttribute("ventas", ventasDTO);
+      }
+      model.addAttribute("currentPage", page);
+      model.addAttribute("totalPages", ventasPage != null ? ventasPage.getTotalPages() : 0);
+      model.addAttribute("pageSize", size);
+      model.addAttribute("sort", sort);
+      model.addAttribute("keyword", keyword);
+      model.addAttribute("sortId", "id," + (sort.startsWith("id") ? (sort.endsWith("asc") ? "desc" : "asc") : "desc"));
             model.addAttribute("sortCliente", "cliente_id," + (sort.startsWith("cliente_id") ? (sort.endsWith("asc") ? "desc" : "asc") : "desc"));
             model.addAttribute("sortFecha", "fecha," + (sort.startsWith("fecha") ? (sort.endsWith("asc") ? "desc" : "asc") : "desc"));
             model.addAttribute("sortTotal", "total," + (sort.startsWith("total") ? (sort.endsWith("asc") ? "desc" : "asc") : "desc"));
@@ -141,11 +140,11 @@ public class VentaController {
         return "ventas/listar";
     }
 
-    @GetMapping("/nueva")
+  @GetMapping("/nueva")
     public String nuevaVentaForm(Model model) {
-        try {
-            Venta venta = new Venta();
-            model.addAttribute("venta", venta);
+    try {
+      Venta venta = new Venta();
+     model.addAttribute("venta", venta);
             List<Cliente> clientes = clienteService.findAll() != null ? new ArrayList<>(clienteService.findAll()) : new ArrayList<>();
             List<Producto> productos = productoService.findAll() != null ? productoService.findAll() : new ArrayList<>();
             model.addAttribute("clientes", clientes);
@@ -461,7 +460,9 @@ public class VentaController {
     }
 
     private String cleanText(String text) {
-        if (text == null) return "N/A";
+        if (text == null) {
+            return "N/A";
+        }
         return text.replaceAll("[\\r\\n\\t]", " ")
                    .replaceAll("[^\\x20-\\x7E]", "")
                    .trim();
@@ -568,10 +569,10 @@ public class VentaController {
         return "error";
     }
 
-    @ExceptionHandler(NonUniqueResultException.class)
+ @ExceptionHandler(NonUniqueResultException.class)
     public String handleNonUniqueResultException(NonUniqueResultException ex, Model model) {
-        logger.error("😱 Error de duplicidad en la base de datos: {}", ex.getMessage(), ex);
-        model.addAttribute("error", "Error: Se encontraron múltiples registros para un identificador único. Por favor, revise la base de datos y elimine duplicados (Comprobante con venta_id).");
+    logger.error("😱 Error de duplicidad en la base de datos: {}", ex.getMessage(), ex);
+      model.addAttribute("error", "Error: Se (Comprobante con venta_id).");
         return "redirect:/ventas/error?message=" + ex.getMessage();
     }
 }
