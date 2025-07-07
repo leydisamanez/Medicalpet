@@ -30,6 +30,6 @@ jobs:
         run: mvn jacoco:report
 
       - name: Analyze with SonarCloud
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=Leydi_Samanez_Espinoza_Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
