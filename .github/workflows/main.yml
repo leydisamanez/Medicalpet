@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better coverage analysis
+          fetch-depth: 0  # Deshabilita clones superficiales para un mejor análisis de cobertura
 
       - name: Set up JDK
         uses: actions/setup-java@v3
@@ -30,8 +30,6 @@ jobs:
         run: mvn jacoco:report
 
       - name: Analyze with SonarCloud
-        run: mvn sonar:sonar
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=Leydi_Samanez_Espinoza_Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        # Asegúrate de que las propiedades estén en sonar-project.properties o pásalas como -D
-        # Ejemplo: -Dsonar.projectKey=your_project_key -Dsonar.organization=your_organization_key
