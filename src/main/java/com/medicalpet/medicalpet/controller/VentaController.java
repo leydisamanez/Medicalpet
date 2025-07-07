@@ -47,8 +47,6 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.persistence.NonUniqueResultException;
 
-import org.springframework.transaction.annotation.Transactional;
-
 @Controller
 @RequestMapping("/ventas")
 public class VentaController {
@@ -161,7 +159,7 @@ public class VentaController {
                 logger.warn("⚠️ No hay productos disponibles para nueva venta");
                 model.addAttribute("warning", "No hay productos disponibles. Agregue productos primero.");
             }
-            logger.info("ℹ️ Formulario de nueva venta cargado con {} clientes y {} productos", clientes.size(), productos.size());
+            logger.info("ℹ️ Form installation de nueva venta cargado con {} clientes y {} productos", clientes.size(), productos.size());
             return "ventas/form";
         } catch (Exception e) {
             logger.error("😱 Error al cargar los datos para nueva venta: {}", e.getMessage(), e);
@@ -190,99 +188,100 @@ public class VentaController {
         return "ventas/form";
     }
 
-    @Transactional
     @PostMapping("/guardar")
-public String guardarVenta(
-        @ModelAttribute("venta") Venta venta,
-        @RequestParam("clienteId") Long clienteId,
-        @RequestParam("tipoComprobante") String tipoComprobante,
-        @RequestParam(value = "ruc", required = false) String ruc,
-        @RequestParam(value = "razonSocial", required = false) String razonSocial,
-        @RequestParam(value = "direccion", required = false) String direccion,
-        @RequestParam(value = "descuento", required = false, defaultValue = "0.0") double descuento,
-        @RequestParam(value = "detalleProductoId", required = false) Long[] detalleProductIds,
-        @RequestParam(value = "detalleCantidad", required = false) Integer[] detalleCantidades,
-        Model model) {
-    try {
-        logger.info("ℹ️ Iniciando guardado de venta. ID de venta recibido: {}, ClienteID: {}", venta.getId(), clienteId);
-        
-        // Forzar nuevo registro si es una creación
-        if (venta.getId() == null) {
-            venta.setId(null);
-        }
+    public String guardarVenta(
+            @ModelAttribute("venta") Venta venta,
+            @RequestParam("clienteId") Long clienteId,
+            @RequestParam("tipoComprobante") String tipoComprobante,
+            @RequestParam(value = "ruc", required = false) String ruc,
+            @RequestParam(value = "razonSocial", required = false) String razonSocial,
+            @RequestParam(value = "direccion", required = false) String direccion,
+            @RequestParam(value = "descuento", required = false, defaultValue = "0.0") double descuento,
+            @RequestParam(value = "detalleProductoId", required = false) Long[] detalleProductIds,
+            @RequestParam(value = "detalleCantidad", required = false) Integer[] detalleCantidades,
+            Model model) {
+        try {
+            logger.info("ℹ️ Iniciando guardado de venta. ID de venta recibido: {}, ClienteID: {}", venta.getId(), clienteId);
 
-        // Asignar el cliente
-        Cliente cliente = clienteService.findById(clienteId)
-                .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + clienteId));
-        venta.setCliente(cliente);
-        logger.info("ℹ️ Cliente asignado: {} {}", cliente.getNombre(), cliente.getApellido());
-
-        if (venta.getFecha() == null) {
-            venta.setFecha(LocalDate.now());
-        }
-
-        // Procesar detalles de la venta
-        List<DetalleVenta> detalles = new ArrayList<>();
-        if (detalleProductIds != null && detalleCantidades != null && detalleProductIds.length > 0 && detalleProductIds.length == detalleCantidades.length) {
-            for (int index = 0; index < detalleProductIds.length; index++) {
-                Long productId = detalleProductIds[index];
-                Integer cantidad = detalleCantidades[index];
-                Producto producto = productoService.findById(productId)
-                        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + productId));
-                if (producto.getStock() < cantidad) {
-                    throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
-                }
-                double precioUnitario = producto.getPrecio();
-                double subtotal = precioUnitario * cantidad;
-                DetalleVenta detalle = new DetalleVenta(venta, producto, cantidad, precioUnitario, subtotal);
-                detalles.add(detalle);
-                producto.setStock(producto.getStock() - cantidad);
-                productoService.save(producto);
-                logger.info("ℹ️ Detalle agregado: Producto {}, Cantidad: {}", producto.getNombre(), cantidad);
+            // Forzar nuevo registro si es una creación
+            if (venta.getId() == null) {
+                venta.setId(null);
             }
-        } else {
-            logger.warn("⚠️ No se proporcionaron detalles de productos o cantidades");
+
+            // Asignar el cliente
+            Cliente cliente = clienteService.findById(clienteId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado con ID: " + clienteId));
+            venta.setCliente(cliente);
+            logger.info("ℹ️ Cliente asignado: {} {}", cliente.getNombre(), cliente.getApellido());
+
+            if (venta.getFecha() == null) {
+                venta.setFecha(LocalDate.now());
+            }
+
+            // Validar detalles de la venta
+            List<DetalleVenta> detalles = new ArrayList<>();
+            if (detalleProductIds != null && detalleCantidades != null && detalleProductIds.length > 0 && detalleProductIds.length == detalleCantidades.length) {
+                for (int index = 0; index < detalleProductIds.length; index++) {
+                    Long productId = detalleProductIds[index];
+                    Integer cantidad = detalleCantidades[index];
+                    if (cantidad == null || cantidad <= 0) {
+                        throw new IllegalArgumentException("La cantidad para el producto con ID " + productId + " no es válida.");
+                    }
+                    Producto producto = productoService.findById(productId)
+                            .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con ID: " + productId));
+                    if (producto.getStock() < cantidad) {
+                        throw new IllegalArgumentException("Stock insuficiente para el producto: " + producto.getNombre());
+                    }
+                    double precioUnitario = producto.getPrecio();
+                    double subtotal = precioUnitario * cantidad;
+                    DetalleVenta detalle = new DetalleVenta(venta, producto, cantidad, precioUnitario, subtotal);
+                    detalles.add(detalle);
+                    logger.info("ℹ️ Detalle agregado: Producto {}, Cantidad: {}", producto.getNombre(), cantidad);
+                }
+            } else {
+                logger.warn("⚠️ No se proporcionaron detalles de productos o cantidades válidas");
+                throw new IllegalArgumentException("Los detalles de productos y cantidades no son válidos.");
+            }
+            venta.setDetalles(detalles);
+
+            // Crear o actualizar el comprobante
+            Comprobante comprobante = venta.getComprobante() != null ? venta.getComprobante() : new Comprobante();
+            comprobante.setVenta(venta);
+            comprobante.setTipoComprobante(Comprobante.TipoComprobante.valueOf(tipoComprobante.toUpperCase()));
+            double base = venta.getDetalles().stream().mapToDouble(DetalleVenta::getSubtotal).sum();
+            comprobante.setSubtotal(base);
+            comprobante.setDescuento(descuento);
+            if (comprobante.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA) {
+                comprobante.setRuc(ruc != null ? ruc : "N/A");
+                comprobante.setRazonSocial(razonSocial != null ? razonSocial : "N/A");
+                comprobante.setDireccion(direccion != null ? direccion : "N/A");
+                comprobante.setIgv(base * 0.18);
+                comprobante.setTotal(base + comprobante.getIgv() - descuento);
+            } else {
+                comprobante.setIgv(0.0);
+                comprobante.setTotal(base - descuento);
+            }
+            venta.setComprobante(comprobante);
+
+            // Guardar la venta completa con detalles y comprobante
+            Venta savedVenta = ventaService.save(venta, comprobante.getTipoComprobante(), ruc, razonSocial, direccion, descuento);
+            logger.info("✅ Venta guardada exitosamente con ID: {}", savedVenta.getId());
+
+            // Generar PDF y enviar correo (fuera de la transacción)
+            String pdfPath = generatePdf(savedVenta, tipoComprobante);
+            sendEmail(savedVenta.getCliente().getEmail(), "Comprobante de Venta - MedicalPet", "Adjunto encontrará su " + tipoComprobante.toLowerCase() + ".", pdfPath);
+
+            return "redirect:/ventas/listar";
+        } catch (Exception e) {
+            logger.error("😱 Error al guardar la venta: {}", e.getMessage(), e);
+            model.addAttribute("error", "Error al guardar la venta: " + e.getMessage());
+            model.addAttribute("venta", venta);
+            model.addAttribute("clientes", clienteService.findAll());
+            model.addAttribute("productos", productoService.findAll());
+            model.addAttribute("detalles", venta.getDetalles() != null ? venta.getDetalles() : new ArrayList<>());
+            return "ventas/form";
         }
-        venta.setDetalles(detalles);
-
-        // Crear o actualizar el comprobante
-        Comprobante comprobante = venta.getComprobante() != null ? venta.getComprobante() : new Comprobante();
-        comprobante.setVenta(venta);
-        comprobante.setTipoComprobante(Comprobante.TipoComprobante.valueOf(tipoComprobante.toUpperCase()));
-        double base = venta.getDetalles().stream().mapToDouble(DetalleVenta::getSubtotal).sum();
-        comprobante.setSubtotal(base);
-        comprobante.setDescuento(descuento);
-        if (comprobante.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA) {
-            comprobante.setRuc(ruc != null ? ruc : "N/A");
-            comprobante.setRazonSocial(razonSocial != null ? razonSocial : "N/A");
-            comprobante.setDireccion(direccion != null ? direccion : "N/A");
-            comprobante.setIgv(base * 0.18);
-            comprobante.setTotal(base + comprobante.getIgv() - descuento);
-        } else {
-            comprobante.setIgv(0.0);
-            comprobante.setTotal(base - descuento);
-        }
-        venta.setComprobante(comprobante);
-
-        // Guardar la venta completa con detalles y comprobante
-        Venta savedVenta = ventaService.save(venta, comprobante.getTipoComprobante(), ruc, descuento);
-        logger.info("✅ Venta guardada exitosamente con ID: {}", savedVenta.getId());
-
-        // Generar PDF y enviar correo
-        String pdfPath = generatePdf(savedVenta, tipoComprobante);
-        sendEmail(savedVenta.getCliente().getEmail(), "Comprobante de Venta - MedicalPet", "Adjunto encontrará su " + tipoComprobante.toLowerCase() + ".", pdfPath);
-
-        return "redirect:/ventas/listar";
-    } catch (Exception e) {
-        logger.error("😱 Error al guardar la venta: {}", e.getMessage(), e);
-        model.addAttribute("error", "Error al guardar la venta: " + e.getMessage());
-        model.addAttribute("venta", venta);
-        model.addAttribute("clientes", clienteService.findAll());
-        model.addAttribute("productos", productoService.findAll());
-        model.addAttribute("detalles", venta.getDetalles() != null ? venta.getDetalles() : new ArrayList<>());
-        return "ventas/form";
     }
-}
 
     @GetMapping("/generar-pdf/{id}")
     public void generarPdf(@PathVariable Long id, HttpServletResponse response) throws IOException {
@@ -304,213 +303,209 @@ public String guardarVenta(
         }
     }
 
- private String generatePdf(Venta venta, String tipoComprobante) throws IOException {
-    String outputPath = "src/main/resources/static/pdf/" + tipoComprobante.toLowerCase() + "_" + venta.getId() + ".pdf";
+    private String generatePdf(Venta venta, String tipoComprobante) throws IOException {
+        String outputPath = "src/main/resources/static/pdf/" + tipoComprobante.toLowerCase() + "_" + venta.getId() + ".pdf";
 
-    try (PDDocument document = new PDDocument()) {
-        PDPage page = new PDPage();
-        document.addPage(page);
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
 
-        PDPageContentStream contentStream = new PDPageContentStream(document, page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
 
-        // Encabezado - Identidad de MedicalPet
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 20);
-        contentStream.setNonStrokingColor(0, 128, 0);
-        contentStream.beginText();
-        contentStream.newLineAtOffset(100, 750);
-        contentStream.showText("MedicalPet");
-        contentStream.endText();
-
-        contentStream.setFont(PDType1Font.HELVETICA, 12);
-        contentStream.setNonStrokingColor(0, 0, 0);
-        contentStream.beginText();
-        contentStream.newLineAtOffset(100, 730);
-        contentStream.showText("R.U.C. 12345678912");
-        contentStream.newLineAtOffset(0, -15);
-        contentStream.showText(tipoComprobante.toUpperCase() + " Electrónica");
-        contentStream.newLineAtOffset(0, -15);
-        contentStream.showText("N° " + String.format("%09d", venta.getId()));
-        contentStream.newLineAtOffset(0, -15);
-        contentStream.showText("Dirección: Av. Veterinaria 123, Lima - Lima - Perú");
-        contentStream.newLineAtOffset(0, -15);
-        contentStream.showText("Telf: (01) 555-1234 | Email: info@medicalpet.com");
-        contentStream.endText();
-
-        // Línea divisoria
-        contentStream.setStrokingColor(0, 128, 0);
-        contentStream.setLineWidth(1);
-        contentStream.moveTo(80, 700);
-        contentStream.lineTo(520, 700);
-        contentStream.stroke();
-
-        // Tabla Dirección
-        float y = 670;
-        drawTable(contentStream, 100, y, 400, 50, new String[][]{
-            {"DIRECCIÓN DE PARTIDA", "DIRECCIÓN DE DESTINO"},
-            {cleanText("Av. Veterinaria 123, Lima - Lima - Perú"), cleanText(venta.getCliente().getDireccion() != null ? venta.getCliente().getDireccion() : "N/A")}
-        }, new float[]{200, 200});
-
-        y -= 70;
-
-        // Tabla Datos de la Mercadería y Destinatario
-        Comprobante comp = venta.getComprobante();
-        drawTable(contentStream, 100, y, 400, 80, new String[][]{
-            {"DATOS DE LA MERCADERÍA", "DESTINATARIO"},
-            {"FECHA DE EMISIÓN: " + venta.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), "RAZÓN SOCIAL: " + cleanText(venta.getCliente().getNombre() + " " + venta.getCliente().getApellido())},
-            {"FECHA DE TRASLADO: " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "RUC: " + cleanText(comp.getRuc() != null ? comp.getRuc() : "N/A") : ""}
-        }, new float[]{200, 200});
-
-        y -= 70;
-
-        // Tabla Unidad de Transporte
-        drawTable(contentStream, 100, y, 400, 50, new String[][]{
-            {"UNIDAD DE TRANSPORTE"},
-            {"MARCA Y N° PLACA: N/A", "CONDUCTOR: N/A - DNI: N/A"}
-        }, new float[]{400});
-
-        y -= 70;
-
-        // Tabla de Mercadería
-        float tableTop = y;
-        float tableLeft = 100;
-        float tableRight = 500;
-        float rowHeight = 20;
-        float cellMargin = 5;
-
-        String[] headers = {"CANT.", "DESCRIPCIÓN", "PRECIO UNITARIO (S/)", "SUBTOTAL (S/)"};
-        float[] columnWidths = {70, 230, 100, 100};
-
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-        contentStream.setNonStrokingColor(255, 255, 255);
-        contentStream.beginText();
-        contentStream.newLineAtOffset(tableLeft, tableTop);
-        for (int i = 0; i < headers.length; i++) {
-            contentStream.showText(headers[i]);
-            contentStream.newLineAtOffset(columnWidths[i], 0);
-        }
-        contentStream.endText();
-
-        contentStream.setNonStrokingColor(0, 128, 0);
-        contentStream.addRect(tableLeft - 5, tableTop - rowHeight + 5, tableRight - tableLeft + 10, rowHeight);
-        contentStream.fill();
-
-        contentStream.setStrokingColor(0, 0, 0);
-        contentStream.moveTo(tableLeft, tableTop - rowHeight);
-        contentStream.lineTo(tableRight, tableTop - rowHeight);
-        contentStream.stroke();
-
-        contentStream.setFont(PDType1Font.HELVETICA, 10);
-        contentStream.setNonStrokingColor(0, 0, 0);
-        float yData = tableTop - rowHeight - cellMargin;
-        for (DetalleVenta detalle : venta.getDetalles()) {
+            // Encabezado - Identidad de MedicalPet
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 20);
+            contentStream.setNonStrokingColor(0, 128, 0);
             contentStream.beginText();
-            contentStream.newLineAtOffset(tableLeft, yData);
-            String[] data = {
-                String.valueOf(detalle.getCantidad()),
-                cleanText(detalle.getProducto().getNombre()),
-                String.format("%.2f", detalle.getPrecioUnitario()),
-                String.format("%.2f", detalle.getSubtotal())
-            };
-            for (int i = 0; i < data.length; i++) {
-                contentStream.showText(data[i]);
+            contentStream.newLineAtOffset(100, 750);
+            contentStream.showText("MedicalPet");
+            contentStream.endText();
+
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.setNonStrokingColor(0, 0, 0);
+            contentStream.beginText();
+            contentStream.newLineAtOffset(100, 730);
+            contentStream.showText("R.U.C. 12345678912");
+            contentStream.newLineAtOffset(0, -15);
+            contentStream.showText(tipoComprobante.toUpperCase() + " Electrónica");
+            contentStream.newLineAtOffset(0, -15);
+            contentStream.showText("N° " + String.format("%09d", venta.getId()));
+            contentStream.newLineAtOffset(0, -15);
+            contentStream.showText("Dirección: Av. Veterinaria 123, Lima - Lima - Perú");
+            contentStream.newLineAtOffset(0, -15);
+            contentStream.showText("Telf: (01) 555-1234 | Email: info@medicalpet.com");
+            contentStream.endText();
+
+            // Línea divisoria
+            contentStream.setStrokingColor(0, 128, 0);
+            contentStream.setLineWidth(1);
+            contentStream.moveTo(80, 700);
+            contentStream.lineTo(520, 700);
+            contentStream.stroke();
+
+            // Tabla Dirección
+            float y = 670;
+            drawTable(contentStream, 100, y, 400, 50, new String[][]{
+                {"DIRECCIÓN DE PARTIDA", "DIRECCIÓN DE DESTINO"},
+                {cleanText("Av. Veterinaria 123, Lima - Lima - Perú"), cleanText(venta.getCliente().getDireccion() != null ? venta.getCliente().getDireccion() : "N/A")}
+            }, new float[]{200, 200});
+
+            y -= 70;
+
+            // Tabla Datos de la Mercadería y Destinatario
+            Comprobante comp = venta.getComprobante();
+            drawTable(contentStream, 100, y, 400, 80, new String[][]{
+                {"DATOS DE LA MERCADERÍA", "DESTINATARIO"},
+                {"FECHA DE EMISIÓN: " + venta.getFecha().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), "RAZÓN SOCIAL: " + cleanText(venta.getCliente().getNombre() + " " + venta.getCliente().getApellido())},
+                {"FECHA DE TRASLADO: " + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")), comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "RUC: " + cleanText(comp.getRuc() != null ? comp.getRuc() : "N/A") : ""}
+            }, new float[]{200, 200});
+
+            y -= 70;
+
+            // Tabla Unidad de Transporte
+            drawTable(contentStream, 100, y, 400, 50, new String[][]{
+                {"UNIDAD DE TRANSPORTE"},
+                {"MARCA Y N° PLACA: N/A", "CONDUCTOR: N/A - DNI: N/A"}
+            }, new float[]{400});
+
+            y -= 70;
+
+            // Tabla de Mercadería
+            float tableTop = y;
+            float tableLeft = 100;
+            float tableRight = 500;
+            float rowHeight = 20;
+            float cellMargin = 5;
+
+            String[] headers = {"CANT.", "DESCRIPCIÓN", "PRECIO UNITARIO (S/)", "SUBTOTAL (S/)"};
+            float[] columnWidths = {70, 230, 100, 100};
+
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+            contentStream.setNonStrokingColor(255, 255, 255);
+            contentStream.beginText();
+            contentStream.newLineAtOffset(tableLeft, tableTop);
+            for (int i = 0; i < headers.length; i++) {
+                contentStream.showText(headers[i]);
                 contentStream.newLineAtOffset(columnWidths[i], 0);
             }
             contentStream.endText();
-            yData -= rowHeight;
-        }
 
-        y = yData - 40;
+            contentStream.setNonStrokingColor(0, 128, 0);
+            contentStream.addRect(tableLeft - 5, tableTop - rowHeight + 5, tableRight - tableLeft + 10, rowHeight);
+            contentStream.fill();
 
-        // Tabla Resumen
-        drawTable(contentStream, 100, y, 400, 100, new String[][]{
-            {"RESUMEN"},
-            {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "RUC Cliente: " + cleanText(comp.getRuc() != null ? comp.getRuc() : "N/A") : ""},
-            {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "Razón Social: " + cleanText(comp.getRazonSocial() != null ? comp.getRazonSocial() : "N/A") : ""},
-            {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "Dirección: " + cleanText(comp.getDireccion() != null ? comp.getDireccion() : "N/A") : ""},
-            {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "IGV: " + String.format("%.2f", comp.getIgv()) : ""},
-            {"Descuento: " + String.format("%.2f", comp != null ? comp.getDescuento() : 0.0)},
-            {"Total: " + String.format("%.2f", comp != null ? comp.getTotal() : comp != null ? comp.getSubtotal() : 0.0)}
-        }, new float[]{400});
+            contentStream.setStrokingColor(0, 0, 0);
+            contentStream.moveTo(tableLeft, tableTop - rowHeight);
+            contentStream.lineTo(tableRight, tableTop - rowHeight);
+            contentStream.stroke();
 
-        // Pie de página
-        contentStream.setFont(PDType1Font.HELVETICA, 8);
-        contentStream.setNonStrokingColor(128, 128, 128);
-        contentStream.beginText();
-        contentStream.newLineAtOffset(100, 50);
-        LocalDateTime now = LocalDateTime.now();
-        String dateTime = now.format(DateTimeFormatter.ofPattern("hh:mm a 'on' EEEE, MMMM dd, yyyy"));
-        contentStream.showText("Representación impresa de " + tipoComprobante.toUpperCase() + " | Generado el: " + dateTime + " | MedicalPet © 2025");
-        contentStream.endText();
-
-        contentStream.setStrokingColor(0, 128, 0);
-        contentStream.setLineWidth(2);
-        contentStream.addRect(80, 40, 440, 770);
-        contentStream.stroke();
-
-        contentStream.close();
-
-        File outputFile = new File(outputPath);
-        outputFile.getParentFile().mkdirs();
-        document.save(outputPath);
-        logger.info("✅ PDF generado en: {}", outputPath);
-    } catch (IOException e) {
-        logger.error("😱 Error al generar el PDF para venta con ID {}: {}", venta.getId(), e.getMessage(), e);
-        throw e;
-    }
-
-    return outputPath;
-}
-
-// Método auxiliar para limpiar texto
-private String cleanText(String text) {
-    if (text == null) return "N/A";
-    return text.replaceAll("[\\r\\n\\t]", " ")
-               .replaceAll("[^\\x20-\\x7E]", "")
-               .trim();
-}
-
-// Método auxiliar para dibujar tablas
-private void drawTable(PDPageContentStream contentStream, float x, float y, float width, float height, String[][] data, float[] columnWidths) throws IOException {
-    contentStream.setStrokingColor(0, 0, 0);
-    contentStream.setLineWidth(1);
-    float rowHeight = height / data.length;
-    float tableRight = x + width;
-
-    // Dibujar bordes externos
-    contentStream.addRect(x, y - height, width, height);
-    contentStream.stroke();
-
-    // Dibujar filas y columnas
-    float nextX = x;
-    for (int i = 0; i < columnWidths.length; i++) {
-        contentStream.moveTo(nextX, y - height);
-        contentStream.lineTo(nextX, y);
-        contentStream.stroke();
-        nextX += columnWidths[i];
-    }
-    for (int i = 0; i <= data.length; i++) {
-        float lineY = y - (i * rowHeight);
-        contentStream.moveTo(x, lineY);
-        contentStream.lineTo(tableRight, lineY);
-        contentStream.stroke();
-    }
-
-    // Escribir texto en las celdas
-    contentStream.setFont(PDType1Font.HELVETICA, 10);
-    contentStream.setNonStrokingColor(0, 0, 0);
-    for (int i = 0; i < data.length; i++) {
-        float textY = y - (i * rowHeight) - (rowHeight / 2) + 5;
-        contentStream.beginText();
-        contentStream.newLineAtOffset(x + 5, textY);
-        for (int j = 0; j < data[i].length; j++) {
-            contentStream.showText(cleanText(data[i][j]));
-            if (j < data[i].length - 1) {
-                contentStream.newLineAtOffset(columnWidths[j], 0);
+            contentStream.setFont(PDType1Font.HELVETICA, 10);
+            contentStream.setNonStrokingColor(0, 0, 0);
+            float yData = tableTop - rowHeight - cellMargin;
+            for (DetalleVenta detalle : venta.getDetalles()) {
+                contentStream.beginText();
+                contentStream.newLineAtOffset(tableLeft, yData);
+                String[] data = {
+                    String.valueOf(detalle.getCantidad()),
+                    cleanText(detalle.getProducto().getNombre()),
+                    String.format("%.2f", detalle.getPrecioUnitario()),
+                    String.format("%.2f", detalle.getSubtotal())
+                };
+                for (int i = 0; i < data.length; i++) {
+                    contentStream.showText(data[i]);
+                    contentStream.newLineAtOffset(columnWidths[i], 0);
+                }
+                contentStream.endText();
+                yData -= rowHeight;
             }
+
+            y = yData - 40;
+
+            // Tabla Resumen
+            drawTable(contentStream, 100, y, 400, 100, new String[][]{
+                {"RESUMEN"},
+                {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "RUC Cliente: " + cleanText(comp.getRuc() != null ? comp.getRuc() : "N/A") : ""},
+                {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "Razón Social: " + cleanText(comp.getRazonSocial() != null ? comp.getRazonSocial() : "N/A") : ""},
+                {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "Dirección: " + cleanText(comp.getDireccion() != null ? comp.getDireccion() : "N/A") : ""},
+                {comp != null && comp.getTipoComprobante() == Comprobante.TipoComprobante.FACTURA ? "IGV: " + String.format("%.2f", comp.getIgv()) : ""},
+                {"Descuento: " + String.format("%.2f", comp != null ? comp.getDescuento() : 0.0)},
+                {"Total: " + String.format("%.2f", comp != null ? comp.getTotal() : comp != null ? comp.getSubtotal() : 0.0)}
+            }, new float[]{400});
+
+            // Pie de página
+            contentStream.setFont(PDType1Font.HELVETICA, 8);
+            contentStream.setNonStrokingColor(128, 128, 128);
+            contentStream.beginText();
+            contentStream.newLineAtOffset(100, 50);
+            LocalDateTime now = LocalDateTime.now();
+            String dateTime = now.format(DateTimeFormatter.ofPattern("hh:mm a 'on' EEEE, MMMM dd, yyyy"));
+            contentStream.showText("Representación impresa de " + tipoComprobante.toUpperCase() + " | Generado el: " + dateTime + " | MedicalPet © 2025");
+            contentStream.endText();
+
+            contentStream.setStrokingColor(0, 128, 0);
+            contentStream.setLineWidth(2);
+            contentStream.addRect(80, 40, 440, 770);
+            contentStream.stroke();
+
+            contentStream.close();
+
+            File outputFile = new File(outputPath);
+            outputFile.getParentFile().mkdirs();
+            document.save(outputPath);
+            logger.info("✅ PDF generado en: {}", outputPath);
+        } catch (IOException e) {
+            logger.error("😱 Error al generar el PDF para venta con ID {}: {}", venta.getId(), e.getMessage(), e);
+            throw e;
         }
-        contentStream.endText();
+
+        return outputPath;
     }
-}
+
+    private String cleanText(String text) {
+        if (text == null) return "N/A";
+        return text.replaceAll("[\\r\\n\\t]", " ")
+                   .replaceAll("[^\\x20-\\x7E]", "")
+                   .trim();
+    }
+
+    private void drawTable(PDPageContentStream contentStream, float x, float y, float width, float height, String[][] data, float[] columnWidths) throws IOException {
+        contentStream.setStrokingColor(0, 0, 0);
+        contentStream.setLineWidth(1);
+        float rowHeight = height / data.length;
+        float tableRight = x + width;
+
+        contentStream.addRect(x, y - height, width, height);
+        contentStream.stroke();
+
+        float nextX = x;
+        for (int i = 0; i < columnWidths.length; i++) {
+            contentStream.moveTo(nextX, y - height);
+            contentStream.lineTo(nextX, y);
+            contentStream.stroke();
+            nextX += columnWidths[i];
+        }
+        for (int i = 0; i <= data.length; i++) {
+            float lineY = y - (i * rowHeight);
+            contentStream.moveTo(x, lineY);
+            contentStream.lineTo(tableRight, lineY);
+            contentStream.stroke();
+        }
+
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.setNonStrokingColor(0, 0, 0);
+        for (int i = 0; i < data.length; i++) {
+            float textY = y - (i * rowHeight) - (rowHeight / 2) + 5;
+            contentStream.beginText();
+            contentStream.newLineAtOffset(x + 5, textY);
+            for (int j = 0; j < data[i].length; j++) {
+                contentStream.showText(cleanText(data[i][j]));
+                if (j < data[i].length - 1) {
+                    contentStream.newLineAtOffset(columnWidths[j], 0);
+                }
+            }
+            contentStream.endText();
+        }
+    }
+
     private void sendEmail(String to, String subject, String body, String attachmentPath) throws MessagingException {
         try {
             MimeMessage message = mailSender.createMimeMessage();
