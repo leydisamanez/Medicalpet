@@ -15,13 +15,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Necesario para un análisis completo de ramas
+          fetch-depth: 0  # Deshabilita clones superficiales para un análisis completo
 
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           java-version: '21'
           distribution: 'temurin'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
       - name: Build with Maven
         run: mvn clean install
@@ -30,6 +37,6 @@ jobs:
         run: mvn jacoco:report
 
       - name: Analyze with SonarCloud
-        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=Leydi_Samanez_Espinoza_Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.branch.name=main
+        run: mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=Leydi_Samanez_Espinoza_Medicalpet -Dsonar.organization=leydi_samanez_espinoza -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.branch.name=main -Dsonar.branch.target=main
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
